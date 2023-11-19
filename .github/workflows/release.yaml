@@ -63,7 +63,6 @@ jobs:
   deploy-pages:
     needs: release-wasm
 
-
     permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
@@ -76,8 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
-        # uses: actions/deploy-pages@v2
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/deploy-pages@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifact_name: wasm
