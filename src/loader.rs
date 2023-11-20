@@ -84,8 +84,8 @@ fn finished_loading(
         println!("loaded paperman :)");
         println!("animations: {:?}", paperman.named_animations.keys());
     }
-    // if let Some(building) = gltfs.get(assets.building.id()) {
-    //     // println!("building: {:#?}", building);
-    // }
+    if let Some(building) = gltfs.get(assets.building.id()) {
+        println!("building: {:#?}", building);
+    }
     state.set(GameState::GameLoading);
 }

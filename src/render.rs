@@ -1,5 +1,6 @@
 use bevy::animation::{AnimationPlayer, RepeatAnimation};
 use bevy::asset::Assets;
+use bevy::ecs::schedule::NextState;
 use bevy::ecs::system::{Query, ResMut};
 use bevy::gltf::Gltf;
 use bevy::math::{Quat, Vec3};
@@ -17,30 +18,22 @@ pub struct RenderPlugin;
 
 impl Plugin for RenderPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::GameLoading), startup);
+        app.add_systems(OnEnter(GameState::GameLoading), setup);
         app.add_systems(Update, update.run_if(in_state(GameState::GameLoading)));
     }
 }
 
-fn startup(
+fn setup(
     mut commands: Commands,
     assets: Res<GameAssets>,
     gltfs: Res<Assets<Gltf>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut state: ResMut<NextState<GameState>>,
 ) {
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
         brightness: 0.4,
-    });
-
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane {
-            size: 500000.0,
-            subdivisions: 100,
-        })),
-        material: materials.add(Color::rgb(0.3, 0.3, 0.3).into()),
-        ..Default::default()
     });
 
     commands.spawn(PointLightBundle {
@@ -64,6 +57,8 @@ fn startup(
         scene: building.default_scene.clone().unwrap(),
         ..Default::default()
     });
+
+    state.set(GameState::GameRunning);
 }
 
 fn update(
