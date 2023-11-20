@@ -1,19 +1,12 @@
-use anyhow::{anyhow, Result};
-use bevy::a11y::accesskit::Vec2;
-use bevy::animation::{AnimationPlayer, RepeatAnimation};
 use bevy::asset::Assets;
 use bevy::ecs::component::Component;
 use bevy::ecs::schedule::NextState;
-use bevy::ecs::system::{Query, ResMut, Resource};
+use bevy::ecs::system::ResMut;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
 use bevy::log::info;
-use bevy::math::{Quat, Vec3};
-use bevy::pbr::{AmbientLight, PbrBundle, PointLightBundle, StandardMaterial};
-use bevy::prelude::{in_state, App, Commands, IntoSystemConfigs, OnEnter, Plugin, Res, Update};
-use bevy::render::color::Color;
-use bevy::render::mesh::{shape, Mesh};
-use bevy::scene::SceneBundle;
-use bevy::transform::components::Transform;
+use bevy::math::Vec3;
+use bevy::prelude::{App, Commands, OnEnter, Plugin, Res};
+use bevy::render::mesh::Mesh;
 
 use crate::loader::GameAssets;
 use crate::navmesh::NavMesh;

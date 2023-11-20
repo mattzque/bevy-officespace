@@ -4,10 +4,9 @@ use bevy::ecs::schedule::NextState;
 use bevy::ecs::system::{Query, ResMut};
 use bevy::gltf::Gltf;
 use bevy::math::{Quat, Vec3};
-use bevy::pbr::{AmbientLight, PbrBundle, PointLightBundle, StandardMaterial};
+use bevy::pbr::{AmbientLight, PointLightBundle};
 use bevy::prelude::{in_state, App, Commands, IntoSystemConfigs, OnEnter, Plugin, Res, Update};
 use bevy::render::color::Color;
-use bevy::render::mesh::{shape, Mesh};
 use bevy::scene::SceneBundle;
 use bevy::transform::components::Transform;
 
@@ -27,8 +26,6 @@ fn setup(
     mut commands: Commands,
     assets: Res<GameAssets>,
     gltfs: Res<Assets<Gltf>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mut state: ResMut<NextState<GameState>>,
 ) {
     commands.insert_resource(AmbientLight {

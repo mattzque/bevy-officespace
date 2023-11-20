@@ -59,25 +59,33 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       
-  deploy-pages:
-    needs: release-wasm
-
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
-    steps:
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
+        uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
+          branch: gh-pages
+          folder: wasm
+          clean: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifact_name: wasm
+      
+  # deploy-pages:
+  #   needs: release-wasm
+
+  #   permissions:
+  #     pages: write      # to deploy to Pages
+  #     id-token: write   # to verify the deployment originates from an appropriate source
+
+  #   # Deploy to the github-pages environment
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy to GitHub Pages
+  #       uses: actions/deploy-pages@v2
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         artifact_name: wasm
 
 #  # Build for Linux
 #  release-linux:
