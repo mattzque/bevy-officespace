@@ -1,39 +1,32 @@
-// Bevy code commonly triggers these lints and they may be important signals
-// about code quality. They are sometimes hard to avoid though, and the CI
-// workflow treats them as errors, so this allows them throughout the project.
-// Feel free to delete this line.
-#![allow(clippy::too_many_arguments, clippy::type_complexity)]
-
-mod camera;
-mod loader;
-mod navmesh;
-mod player;
-mod render;
-mod states;
-
 use bevy::{
     app::{App, PluginGroup},
+    log::LogPlugin,
     window::{PresentMode, Window, WindowPlugin},
     DefaultPlugins,
 };
-use camera::CameraPlugin;
-use loader::LoaderPlugin;
-use player::PlayerPlugin;
-use render::RenderPlugin;
-use states::GameState;
+use bevy_officespace::GamePlugin;
+
+const WINDOW_TITLE: &str = "bevy-officespace";
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                present_mode: PresentMode::AutoNoVsync, // Reduces input lag.
-                fit_canvas_to_parent: true,
-                ..Default::default()
-            }),
-            ..Default::default()
-        }))
-        .add_plugins(bevy_flycam::NoCameraPlayerPlugin)
-        .add_plugins((LoaderPlugin, CameraPlugin, RenderPlugin, PlayerPlugin))
-        .add_state::<GameState>()
+        .add_plugins(
+            DefaultPlugins
+                .set(LogPlugin {
+                    filter: "info,wgpu_core=warn,wgpu_hal=warn,bevy_officespace=debug".into(),
+                    level: bevy::log::Level::DEBUG,
+                })
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: WINDOW_TITLE.to_string(),
+                        present_mode: PresentMode::AutoNoVsync,
+                        fit_canvas_to_parent: true,
+                        resizable: true,
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+        )
+        .add_plugins(GamePlugin)
         .run();
 }

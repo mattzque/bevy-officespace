@@ -3,3 +3,5 @@ releases
 assets/raw
 wasm/bevy_game.js
 wasm/bevy_game_bg.wasm
+wasm/assets
+*.blend1
