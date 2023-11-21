@@ -14,7 +14,7 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<states::GameState>();
-        app.add_plugins(bevy_flycam::NoCameraPlayerPlugin);
+        // app.add_plugins(bevy_flycam::NoCameraPlayerPlugin);
         app.add_plugins((
             assets::GameAssetPlugin,
             building::BuildingPlugin,

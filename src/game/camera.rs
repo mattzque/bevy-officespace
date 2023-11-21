@@ -15,6 +15,10 @@ fn setup_cameras(mut commands: Commands) {
     commands.spawn((
         Camera3dBundle {
             transform: Transform::from_translation(Vec3::ZERO).looking_at(Vec3::ZERO, Vec3::Y),
+            projection: Projection::Perspective(PerspectiveProjection {
+                fov: 50.0,
+                ..Default::default()
+            }),
             camera: Camera {
                 order: 1,
                 is_active: false,

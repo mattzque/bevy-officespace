@@ -1,5 +1,7 @@
+use bevy::ecs::system::RunSystemOnce;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
 use bevy::prelude::*;
+use bevy::render::view::NoFrustumCulling;
 
 use crate::{common::navmesh::NavMesh, game::assets::GameAssets};
 
@@ -19,6 +21,16 @@ fn hide_by_mesh_in_world(world: &mut World, mesh: AssetId<Mesh>) {
             *visibility = Visibility::Hidden;
         }
     }
+}
+
+fn disable_frustum_culling_in_world(world: &mut World) {
+    world.run_system_once(
+        |query: Query<Entity, With<Handle<Mesh>>>, mut commands: Commands| {
+            for entity in query.iter() {
+                commands.entity(entity).insert(NoFrustumCulling);
+            }
+        },
+    );
 }
 
 pub fn prepare_building_resource(
@@ -62,6 +74,7 @@ pub fn prepare_building_resource(
     // hide the navmesh in the scene:
     if let Some(scene) = scenes.get_mut(scene.clone()) {
         hide_by_mesh_in_world(&mut scene.world, handle_navmesh.id());
+        disable_frustum_culling_in_world(&mut scene.world);
     }
 
     debug!("position: {:?}", player);

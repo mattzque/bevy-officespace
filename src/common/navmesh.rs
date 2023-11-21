@@ -26,7 +26,7 @@ impl Triangle {
         let area1 = Self(point, *a, *b).area();
         let area2 = Self(point, *b, *c).area();
         let area3 = Self(point, *c, *a).area();
-        (area1 + area2 + area3 - area_main).abs() < 1e-3
+        (area1 + area2 + area3 - area_main).abs() < 1.0
     }
 }
 
