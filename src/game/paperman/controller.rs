@@ -17,8 +17,6 @@ pub struct KeyMap {
 pub struct Options {
     keymap: KeyMap,
     acceleration: f32,
-    friction: f32,
-    max_speed: f32,
 }
 
 impl Default for Options {
@@ -28,9 +26,7 @@ impl Default for Options {
                 left: KeyCode::Left,
                 right: KeyCode::Right,
             },
-            acceleration: 0.103,
-            friction: 0.07,
-            max_speed: 0.01,
+            acceleration: 10.0,
         }
     }
 }
@@ -72,7 +68,6 @@ pub fn movement_direction(
 /// Update controller state from user input
 pub fn update_input_state_system(
     mut query: Query<PapermanControllerQuery>,
-    mut player: Query<(Entity, &mut Transform, &mut AnimationPlayer)>,
     input: Res<Input<KeyCode>>,
     options: Res<Options>,
 ) {
@@ -151,100 +146,24 @@ pub fn finished_turning_animation_system(
     }
 }
 
-/*
-pub fn update_movement_system(
-    mut commands: Commands,
+pub fn movement_system(
     mut query: Query<PapermanControllerQuery>,
     time: Res<Time>,
-    input: Res<Input<KeyCode>>,
     options: Res<Options>,
     building: Res<BuildingResource>,
 ) {
     let mut result = query.single_mut();
     let dt = time.delta_seconds();
 
-    let direction = movement_direction(&input, options.keymap.left, options.keymap.right);
-
-    let forward = direction.as_ref().map_or(Vec3::ZERO, |dir| dir.forward());
-
-    // if let Some(direction) = direction.as_ref() {
-    //     if *direction != *result.rotation {
-    //         let next_state = if direction == &PapermanDirection::Left {
-    //             PapermanAnimationState::TurnLeft
-    //         } else {
-    //             PapermanAnimationState::TurnRight
-    //         };
-
-    //         if next_state != result.animation_state.state {
-    //             result.animation_state.set(next_state);
-    //         }
-
-    //         // commands
-    //         //     .entity(result.entity)
-    //         //     .insert();
-
-    //         // wait until the animation turned the player
-    //         return;
-    //     }
-    // }
-
-    let accel = forward;
-
-    let accel: Vec3 = if accel.length() != 0.0 {
-        accel.normalize() * options.acceleration
+    let velocity = if let PapermanControllerState::Running(direction) = result.state.as_ref() {
+        direction.forward() * options.acceleration * dt
     } else {
         Vec3::ZERO
     };
 
-    let mut velocity = result.velocity.0;
-
-    let friction: Vec3 = if velocity.length() != 0.0 {
-        velocity.normalize() * -1.0 * options.friction
-    } else {
-        Vec3::ZERO
-    };
-
-    velocity += accel * dt;
-
-    // if let Some(direction) = direction {
-    //     let next_state = if direction == PapermanDirection::Left {
-    //         PapermanAnimationState::Walking
-    //     } else {
-    //         PapermanAnimationState::Walking
-    //     };
-
-    //     if next_state != result.animation_state.state {
-    //         result.animation_state.set(next_state);
-    //     }
-    // }
-
-    let state = match direction {
-        Some(PapermanDirection::Left) => PapermanAnimationState::Walking,
-        Some(PapermanDirection::Right) => PapermanAnimationState::Walking,
-        None => PapermanAnimationState::Idle,
-    };
-    if state != result.animation_state.state {
-        result.animation_state.set(state);
-    }
-
-    // clamp within max speed
-    if velocity.length() > options.max_speed {
-        velocity = velocity.normalize() * options.max_speed;
-    }
-
-    let delta_friction = friction * dt;
-
-    velocity = if (velocity + delta_friction).signum() != velocity.signum() {
-        Vec3::ZERO
-    } else {
-        velocity + delta_friction
-    };
-
-    result.velocity.0 = velocity;
     let position = result.position.0 + velocity;
 
     if building.navmesh.contains_point(position) {
         result.position.0 = position;
     }
 }
-*/

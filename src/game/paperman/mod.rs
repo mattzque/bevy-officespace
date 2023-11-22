@@ -36,36 +36,36 @@ impl Plugin for PapermanPlugin {
             update_paperman_transform_system,
         );
         app.configure_sets(
-            Update,
+            First,
             (
                 PapermanSystemSet::Controller,
-                PapermanSystemSet::Animation,
                 PapermanSystemSet::Update,
+                PapermanSystemSet::Animation,
             )
                 .chain(),
         );
+        // app.add_systems(Update);
+        // .run_if(in_state(GameState::GameRunning)),
         app.add_systems(
-            PreUpdate,
+            First,
             (
                 (
                     controller::update_input_state_system,
                     controller::update_animation_state_system,
                     controller::finished_turning_animation_system,
+                    controller::movement_system,
                 )
                     .in_set(PapermanSystemSet::Controller),
+                (update_paperman_transform_system,).in_set(PapermanSystemSet::Update),
                 (
                     animation::play_animation_state_system,
                     animation::finish_animation_state_system,
                 )
                     .in_set(PapermanSystemSet::Animation),
-                update_paperman_transform_system.in_set(PapermanSystemSet::Update),
             )
+                .chain()
                 .run_if(in_state(GameState::GameRunning)),
         );
-        // app.add_systems(
-        //     OnEnter(GameState::GameRunning),
-        //     update_paperman_transform_system,
-        // );
     }
 }
 
@@ -108,10 +108,12 @@ impl PapermanDirection {
 pub struct PapermanVelocity(Vec3);
 
 #[derive(WorldQuery)]
+#[world_query(mutable)]
 struct PapermanTransformQuery {
     entity: Entity,
     position: &'static PapermanPosition,
     rotation: &'static PapermanDirection,
+    transform: &'static mut Transform,
 }
 
 fn transform_from_player(position: &PapermanPosition, rotation: &PapermanDirection) -> Transform {
@@ -150,44 +152,18 @@ fn prepare_paperman_system(
                 transform: Transform::from_translation(Vec3::new(0.0, 3.0, 0.0)),
                 ..Default::default()
             });
-            // children.spawn(DirectionalLightBundle {
-            //     directional_light: DirectionalLight {
-            //         illuminance: 100.0,
-            //         shadows_enabled: true,
-            //         ..Default::default()
-            //     },
-            //     transform: Transform::from_translation(Vec3::new(0.0, 3.0, 0.0)),
-            //     // transform: Transform::from_rotation(Quat::from_euler(
-            //     //     EulerRot::ZYX,
-            //     //     0.0,
-            //     //     PI / 2.,
-            //     //     -PI / 4.,
-            //     // )),
-            //     cascade_shadow_config: CascadeShadowConfigBuilder {
-            //         first_cascade_far_bound: 7.0,
-            //         maximum_distance: 25.0,
-            //         ..Default::default()
-            //     }
-            //     .into(),
-            //     ..Default::default()
-            // });
         });
 }
-type X = Or<(Changed<PapermanPosition>, Changed<PapermanDirection>)>;
+
 fn update_paperman_transform_system(
     mut commands: Commands,
-    mut query: Query<PapermanTransformQuery, X>,
+    mut query: Query<PapermanTransformQuery>,
     camera: Query<Entity, With<Camera3d>>,
-    time: Res<Time>,
 ) {
-    if let Ok(result) = query.get_single_mut() {
+    if let Ok(mut result) = query.get_single_mut() {
         let transform = transform_from_player(result.position, result.rotation);
 
-        // info!(
-        //     "update paperman direction on transform! {:?} [{}]",
-        //     result.rotation,
-        //     time        );
-        commands.entity(result.entity).insert(transform);
+        *result.transform = transform;
 
         if let Ok(camera) = camera.get_single() {
             commands.entity(camera).insert(

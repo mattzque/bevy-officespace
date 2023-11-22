@@ -1,12 +1,11 @@
 use bevy::{
     app::{App, PluginGroup},
     log::LogPlugin,
+    render::pipelined_rendering::PipelinedRenderingPlugin,
     window::{PresentMode, Window, WindowPlugin},
     DefaultPlugins,
 };
 use bevy_officespace::GamePlugin;
-
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 const WINDOW_TITLE: &str = "bevy-officespace";
 
@@ -27,9 +26,9 @@ fn main() {
                         ..Default::default()
                     }),
                     ..Default::default()
-                }),
+                })
+                .disable::<PipelinedRenderingPlugin>(),
         )
-        .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(GamePlugin)
         .run();
 }

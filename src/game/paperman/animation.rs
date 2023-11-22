@@ -44,12 +44,6 @@ impl PapermanAnimationResource {
         Self { animations }
     }
 
-    pub fn default_clip(&self) -> &PapermanAnimationClip {
-        self.animations
-            .get(&PapermanAnimationState::default())
-            .unwrap()
-    }
-
     pub fn clip_for(&self, animation_type: &PapermanAnimationState) -> &PapermanAnimationClip {
         self.animations.get(animation_type).unwrap_or(
             self.animations
@@ -91,9 +85,9 @@ pub fn setup_animation_system(mut commands: Commands, paperman: Res<PapermanReso
         (
             PapermanAnimationState::Turning,
             PapermanAnimationClip {
-                handle: paperman.animations.get("turn180").unwrap().clone(),
+                handle: paperman.animations.get("turn180.001").unwrap().clone(),
                 looped: false,
-                transition: Duration::from_millis(0),
+                transition: Duration::from_millis(400),
                 ..Default::default()
             },
         ),
@@ -103,17 +97,17 @@ pub fn setup_animation_system(mut commands: Commands, paperman: Res<PapermanReso
 
 /// Play the clip for the current animation state
 pub fn play_animation_state_system(
-    query: Query<(&PapermanAnimationState, &Children), Changed<PapermanAnimationState>>,
+    query: Query<&PapermanAnimationState, Changed<PapermanAnimationState>>,
     // should be a ancestor? confusing with scenes
-    mut player: Query<(Entity, &mut AnimationPlayer)>,
+    mut player: Query<&mut AnimationPlayer>,
     animations: Res<PapermanAnimationResource>,
 ) {
-    let (player_entity, mut player) = player.single_mut();
-    if let Ok((state, children)) = query.get_single() {
+    let mut player = player.single_mut();
+    if let Ok(state) = query.get_single() {
         let clip = animations.clip_for(state);
         info!("play clip {:?}", state);
         player.play_with_transition(clip.handle.clone_weak(), clip.transition);
-        player.play(clip.handle.clone_weak()); // , clip.transition);
+        // player.start(clip.handle.clone_weak()); // , clip.transition);
         player.set_speed(clip.speed);
         player.set_repeat(if clip.looped {
             RepeatAnimation::Forever
@@ -137,14 +131,12 @@ pub fn finish_animation_state_system(
     mut finished_events: EventWriter<PapermanAnimationFinishedEvent>,
 ) {
     let player = player.single_mut();
-    if let Ok(mut state) = query.get_single_mut() {
+    if let Ok(state) = query.get_single_mut() {
         let clip = animations.clip_for(&state);
         if player.is_playing_clip(&clip.handle) && player.is_finished() && !clip.looped {
             finished_events.send(PapermanAnimationFinishedEvent {
                 state: state.clone(),
             });
-
-            // *state = PapermanAnimationState::default();
         }
     }
 }
