@@ -18,6 +18,7 @@ pub fn prepare_paperman_resource(
     let paperman = gltfs.get(assets.paperman.id()).unwrap();
 
     let animations = paperman.named_animations.clone();
+    info!("animations: {:?}", animations.keys());
 
     let scene = paperman.default_scene.clone().unwrap();
 

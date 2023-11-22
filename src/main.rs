@@ -6,6 +6,8 @@ use bevy::{
 };
 use bevy_officespace::GamePlugin;
 
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+
 const WINDOW_TITLE: &str = "bevy-officespace";
 
 fn main() {
@@ -19,7 +21,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: WINDOW_TITLE.to_string(),
-                        present_mode: PresentMode::AutoNoVsync,
+                        present_mode: PresentMode::AutoVsync,
                         fit_canvas_to_parent: true,
                         resizable: true,
                         ..Default::default()
@@ -27,6 +29,7 @@ fn main() {
                     ..Default::default()
                 }),
         )
+        .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(GamePlugin)
         .run();
 }
