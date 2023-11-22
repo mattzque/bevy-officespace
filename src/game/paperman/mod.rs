@@ -143,10 +143,10 @@ fn prepare_paperman_system(
         .with_children(|children| {
             children.spawn(PointLightBundle {
                 point_light: PointLight {
-                    color: Color::RED,
+                    color: Color::WHITE,
                     intensity: 100.0,
                     radius: 20.0,
-                    shadows_enabled: true,
+                    // shadows_enabled: true, broken in wasm
                     ..Default::default()
                 },
                 transform: Transform::from_translation(Vec3::new(0.0, 3.0, 0.0)),

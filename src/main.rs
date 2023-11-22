@@ -26,8 +26,7 @@ fn main() {
                         ..Default::default()
                     }),
                     ..Default::default()
-                })
-                .disable::<PipelinedRenderingPlugin>(),
+                }),
         )
         .add_plugins(GamePlugin)
         .run();
