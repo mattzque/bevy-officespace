@@ -85,7 +85,7 @@ pub fn setup_animation_system(mut commands: Commands, paperman: Res<PapermanReso
         (
             PapermanAnimationState::Turning,
             PapermanAnimationClip {
-                handle: paperman.animations.get("turn180.001").unwrap().clone(),
+                handle: paperman.animations.get("turn180").unwrap().clone(),
                 looped: false,
                 transition: Duration::from_millis(400),
                 ..Default::default()

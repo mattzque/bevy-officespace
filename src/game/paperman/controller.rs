@@ -163,7 +163,7 @@ pub fn movement_system(
 
     let position = result.position.0 + velocity;
 
-    if building.navmesh.contains_point(position) {
-        result.position.0 = position;
-    }
+    // if building.navmesh.contains_point(position) {
+    result.position.0 = position;
+    // }
 }

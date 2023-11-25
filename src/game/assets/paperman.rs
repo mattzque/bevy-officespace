@@ -16,12 +16,12 @@ pub fn prepare_paperman_resource(
     gltfs: Res<Assets<Gltf>>,
 ) {
     let paperman = gltfs.get(assets.paperman.id()).unwrap();
-
     let animations = paperman.named_animations.clone();
-    info!("animations: {:?}", animations.keys());
-
     let scene = paperman.default_scene.clone().unwrap();
 
+    info!(
+        "PapermanResource loaded (animations: {:?})",
+        animations.keys()
+    );
     commands.insert_resource(PapermanResource { scene, animations });
-    info!("PapermanResource prepared!");
 }

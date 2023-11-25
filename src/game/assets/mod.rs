@@ -9,9 +9,11 @@ use super::states::{
 };
 
 mod building;
+mod paperbox;
 mod paperman;
 
 pub use building::BuildingResource;
+pub use paperbox::PaperboxResource;
 pub use paperman::PapermanResource;
 
 pub struct GameAssetPlugin;
@@ -33,9 +35,9 @@ impl Plugin for GameAssetPlugin {
             (
                 building::prepare_building_resource.before(finished_loaded_system),
                 paperman::prepare_paperman_resource.before(finished_loaded_system),
+                paperbox::prepare_paperbox_resource.before(finished_loaded_system),
                 finished_loaded_system,
-            ), // .pipe(finished_loaded_system), // prepare_resources
-               //     .map(finished_loaded_system),
+            ),
         );
     }
 }
@@ -44,18 +46,25 @@ impl Plugin for GameAssetPlugin {
 pub struct GameAssets {
     pub paperman: Handle<Gltf>,
     pub building: Handle<Gltf>,
+    pub paperbox: Handle<Gltf>,
 }
 
 fn load_assets_system(mut commands: Commands, server: Res<AssetServer>) {
     // animations: ["idle", "walking", "death", "tpose", "attack", "kick", "running"]
     let paperman: Handle<Gltf> = server.load("paperman.gltf");
     let building: Handle<Gltf> = server.load("building.gltf");
+    let paperbox: Handle<Gltf> = server.load("box.gltf");
     let mut loader = AssetLoader::new();
 
     loader.add_pending(paperman.clone_weak().id().untyped());
     loader.add_pending(building.clone_weak().id().untyped());
+    loader.add_pending(paperbox.clone_weak().id().untyped());
 
-    commands.insert_resource(GameAssets { paperman, building });
+    commands.insert_resource(GameAssets {
+        paperman,
+        building,
+        paperbox,
+    });
     commands.insert_resource(loader);
 }
 
@@ -66,7 +75,3 @@ fn update_loading_system(
     loader.update_loading_state(&server)?;
     Ok(loader.is_finished())
 }
-
-// fn prepare_resources(
-
-// )

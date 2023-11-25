@@ -5,6 +5,7 @@ use self::states::{finished_game_loading_system, GameState};
 mod assets;
 mod building;
 mod camera;
+mod paperbox;
 mod paperman;
 mod render;
 mod states;
@@ -18,6 +19,7 @@ impl Plugin for GamePlugin {
             assets::GameAssetPlugin,
             building::BuildingPlugin,
             paperman::PapermanPlugin,
+            paperbox::PaperboxPlugin,
             camera::CameraPlugin,
             render::RenderPlugin,
         ));

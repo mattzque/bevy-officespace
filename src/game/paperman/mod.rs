@@ -1,4 +1,5 @@
 use bevy::ecs::query::WorldQuery;
+use bevy::input::keyboard;
 use bevy::prelude::*;
 
 use self::animation::{
@@ -26,6 +27,7 @@ pub struct PapermanPlugin;
 impl Plugin for PapermanPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Options::default());
+        app.insert_resource(CameraZoom::default());
         app.add_event::<PapermanAnimationFinishedEvent>();
         app.add_systems(
             OnEnter(GameState::GameLoading),
@@ -36,7 +38,7 @@ impl Plugin for PapermanPlugin {
             update_paperman_transform_system,
         );
         app.configure_sets(
-            First,
+            Update,
             (
                 PapermanSystemSet::Controller,
                 PapermanSystemSet::Update,
@@ -47,7 +49,7 @@ impl Plugin for PapermanPlugin {
         // app.add_systems(Update);
         // .run_if(in_state(GameState::GameRunning)),
         app.add_systems(
-            First,
+            Update,
             (
                 (
                     controller::update_input_state_system,
@@ -56,7 +58,7 @@ impl Plugin for PapermanPlugin {
                     controller::movement_system,
                 )
                     .in_set(PapermanSystemSet::Controller),
-                (update_paperman_transform_system,).in_set(PapermanSystemSet::Update),
+                (zoom_camera, update_paperman_transform_system).in_set(PapermanSystemSet::Update),
                 (
                     animation::play_animation_state_system,
                     animation::finish_animation_state_system,
@@ -68,6 +70,9 @@ impl Plugin for PapermanPlugin {
         );
     }
 }
+
+#[derive(Resource, Default)]
+pub struct CameraZoom(f32);
 
 #[derive(Component, Debug)]
 pub struct Paperman;
@@ -85,8 +90,8 @@ pub enum PapermanDirection {
 }
 
 impl PapermanDirection {
-    const ROTATION_LEFT: f32 = 90.0;
-    const ROTATION_RIGHT: f32 = 270.0;
+    const ROTATION_LEFT: f32 = 270.0;
+    const ROTATION_RIGHT: f32 = 90.0;
 
     pub fn as_quat(&self) -> Quat {
         match self {
@@ -97,8 +102,8 @@ impl PapermanDirection {
 
     pub fn forward(&self) -> Vec3 {
         match self {
-            Self::Left => Vec3::X,
-            Self::Right => Vec3::X * -1.0,
+            Self::Left => -Vec3::X,
+            Self::Right => Vec3::X,
         }
     }
 }
@@ -127,10 +132,12 @@ fn prepare_paperman_system(
     building: Res<BuildingResource>,
     paperman: Res<PapermanResource>,
 ) {
+    let mut pos = building.tracks.first().unwrap().first() + (Vec3::X * 3.0);
+    pos.z = -pos.z;
     commands
         .spawn((
             Paperman,
-            PapermanPosition(building.player),
+            PapermanPosition(pos),
             PapermanDirection::Right,
             PapermanVelocity(Vec3::ZERO),
             PapermanControllerState::default(),
@@ -144,8 +151,8 @@ fn prepare_paperman_system(
             children.spawn(PointLightBundle {
                 point_light: PointLight {
                     color: Color::WHITE,
-                    intensity: 100.0,
-                    radius: 20.0,
+                    intensity: 50.0,
+                    radius: 7.0,
                     // shadows_enabled: true, broken in wasm
                     ..Default::default()
                 },
@@ -155,20 +162,36 @@ fn prepare_paperman_system(
         });
 }
 
+fn zoom_camera(keyboard_input: Res<Input<KeyCode>>, mut zoom: ResMut<CameraZoom>, time: Res<Time>) {
+    let dt = time.delta_seconds();
+    const ZOOM_SPEED: f32 = 23.0;
+    if keyboard_input.pressed(KeyCode::Up) {
+        zoom.0 += ZOOM_SPEED * dt;
+    } else if keyboard_input.pressed(KeyCode::Down) {
+        zoom.0 -= ZOOM_SPEED * dt;
+    }
+}
+
 fn update_paperman_transform_system(
     mut commands: Commands,
     mut query: Query<PapermanTransformQuery>,
     camera: Query<Entity, With<Camera3d>>,
+    zoom: Res<CameraZoom>,
 ) {
     if let Ok(mut result) = query.get_single_mut() {
         let transform = transform_from_player(result.position, result.rotation);
 
         *result.transform = transform;
 
+        info!("translate: {:?}", transform.translation);
+
         if let Ok(camera) = camera.get_single() {
             commands.entity(camera).insert(
-                Transform::from_translation(transform.translation + Vec3::new(0.0, 3.0, -28.0))
-                    .looking_at(transform.translation + Vec3::new(0.0, 2.0, 0.0), -Vec3::Y),
+                Transform::from_translation(
+                    // transform.translation + Vec3::new(-30.0, 3.0, 0.0), // 28.0 + zoom.0),
+                    transform.translation + Vec3::new(0.0, 3.0, 28.0 + zoom.0),
+                )
+                .looking_at(transform.translation + Vec3::new(0.0, 2.0, 0.0), -Vec3::Y),
             );
         }
     }
