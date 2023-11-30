@@ -13,7 +13,6 @@ mod paperbox;
 mod paperman;
 
 pub use building::BuildingResource;
-pub use paperbox::PaperboxResource;
 pub use paperman::PapermanResource;
 
 pub struct GameAssetPlugin;

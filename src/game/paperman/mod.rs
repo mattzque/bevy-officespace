@@ -1,5 +1,4 @@
 use bevy::ecs::query::WorldQuery;
-use bevy::input::keyboard;
 use bevy::prelude::*;
 
 use self::animation::{
@@ -132,34 +131,18 @@ fn prepare_paperman_system(
     building: Res<BuildingResource>,
     paperman: Res<PapermanResource>,
 ) {
-    let mut pos = building.tracks.first().unwrap().first() + (Vec3::X * 3.0);
-    pos.z = -pos.z;
-    commands
-        .spawn((
-            Paperman,
-            PapermanPosition(pos),
-            PapermanDirection::Right,
-            PapermanVelocity(Vec3::ZERO),
-            PapermanControllerState::default(),
-            PapermanAnimationState::default(),
-            SceneBundle {
-                scene: paperman.scene.clone(),
-                ..Default::default()
-            },
-        ))
-        .with_children(|children| {
-            children.spawn(PointLightBundle {
-                point_light: PointLight {
-                    color: Color::WHITE,
-                    intensity: 50.0,
-                    radius: 7.0,
-                    // shadows_enabled: true, broken in wasm
-                    ..Default::default()
-                },
-                transform: Transform::from_translation(Vec3::new(0.0, 3.0, 0.0)),
-                ..Default::default()
-            });
-        });
+    commands.spawn((
+        Paperman,
+        PapermanPosition(building.tracks.first().unwrap().first() + (Vec3::X * 3.0)),
+        PapermanDirection::Right,
+        PapermanVelocity(Vec3::ZERO),
+        PapermanControllerState::default(),
+        PapermanAnimationState::default(),
+        SceneBundle {
+            scene: paperman.scene.clone(),
+            ..Default::default()
+        },
+    ));
 }
 
 fn zoom_camera(keyboard_input: Res<Input<KeyCode>>, mut zoom: ResMut<CameraZoom>, time: Res<Time>) {
@@ -183,12 +166,9 @@ fn update_paperman_transform_system(
 
         *result.transform = transform;
 
-        info!("translate: {:?}", transform.translation);
-
         if let Ok(camera) = camera.get_single() {
             commands.entity(camera).insert(
                 Transform::from_translation(
-                    // transform.translation + Vec3::new(-30.0, 3.0, 0.0), // 28.0 + zoom.0),
                     transform.translation + Vec3::new(0.0, 3.0, 28.0 + zoom.0),
                 )
                 .looking_at(transform.translation + Vec3::new(0.0, 2.0, 0.0), -Vec3::Y),

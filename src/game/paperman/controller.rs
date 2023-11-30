@@ -1,8 +1,6 @@
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 
-use crate::game::assets::BuildingResource;
-
 use super::{
     animation::{PapermanAnimationFinishedEvent, PapermanAnimationState},
     PapermanDirection, PapermanPosition, PapermanVelocity,
@@ -150,7 +148,6 @@ pub fn movement_system(
     mut query: Query<PapermanControllerQuery>,
     time: Res<Time>,
     options: Res<Options>,
-    building: Res<BuildingResource>,
 ) {
     let mut result = query.single_mut();
     let dt = time.delta_seconds();
@@ -162,8 +159,5 @@ pub fn movement_system(
     };
 
     let position = result.position.0 + velocity;
-
-    // if building.navmesh.contains_point(position) {
     result.position.0 = position;
-    // }
 }

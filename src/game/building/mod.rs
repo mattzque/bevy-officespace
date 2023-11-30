@@ -10,16 +10,25 @@ impl Plugin for BuildingPlugin {
     }
 }
 
-#[derive(Component, Debug)]
-pub enum BuildingScene {
+#[derive(Debug)]
+pub enum BuildingSceneDirection {
     Left,
     LeftRight,
     Right,
 }
 
-const BUILDING_LR_WIDTH: f32 = 65.0;
-const BUILDING_L_WIDTH: f32 = 68.8427;
-const BUILDING_R_WIDTH: f32 = 66.8975;
+#[derive(Component, Debug)]
+pub struct BuildingScene {
+    pub direction: BuildingSceneDirection,
+    pub width: f32,
+    pub offset: f32,
+}
+
+const BUILDING_LR_WIDTH: f32 = 65.3827;
+const BUILDING_L_WIDTH: f32 = 68.8429;
+const BUILDING_R_WIDTH: f32 = 67.251;
+const BUILDING_LR_OFFSET: f32 = 1.86839;
+const BUILDING_L_OFFSET: f32 = 1.86839;
 
 fn prepare_scenes_system(mut commands: Commands, building: Res<BuildingResource>) {
     commands.spawn((
@@ -28,26 +37,42 @@ fn prepare_scenes_system(mut commands: Commands, building: Res<BuildingResource>
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
             ..Default::default()
         },
-        BuildingScene::Right,
+        BuildingScene {
+            direction: BuildingSceneDirection::Right,
+            width: BUILDING_R_WIDTH,
+            offset: 0.0,
+        },
     ));
     commands.spawn((
         SceneBundle {
             scene: building.scene_lropen.clone(),
-            transform: Transform::from_translation(Vec3::new(BUILDING_R_WIDTH, 0.0, 0.0)),
+            transform: Transform::from_translation(Vec3::new(
+                BUILDING_R_WIDTH - BUILDING_LR_OFFSET,
+                0.0,
+                0.0,
+            )),
             ..Default::default()
         },
-        BuildingScene::LeftRight,
+        BuildingScene {
+            direction: BuildingSceneDirection::LeftRight,
+            width: BUILDING_LR_WIDTH,
+            offset: BUILDING_LR_OFFSET,
+        },
     ));
-    // commands.spawn((
-    //     SceneBundle {
-    //         scene: building.scene_lopen.clone(),
-    //         transform: Transform::from_translation(Vec3::new(
-    //             BUILDING_R_WIDTH + BUILDING_LR_WIDTH,
-    //             0.0,
-    //             0.0,
-    //         )),
-    //         ..Default::default()
-    //     },
-    //     BuildingScene::Left,
-    // ));
+    commands.spawn((
+        SceneBundle {
+            scene: building.scene_lopen.clone(),
+            transform: Transform::from_translation(Vec3::new(
+                (BUILDING_R_WIDTH - BUILDING_LR_OFFSET) + (BUILDING_LR_WIDTH - BUILDING_L_OFFSET),
+                0.0,
+                0.0,
+            )),
+            ..Default::default()
+        },
+        BuildingScene {
+            direction: BuildingSceneDirection::Left,
+            width: BUILDING_L_WIDTH,
+            offset: BUILDING_L_OFFSET,
+        },
+    ));
 }

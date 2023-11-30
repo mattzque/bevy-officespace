@@ -1,7 +1,6 @@
 use bevy::{
     app::{App, PluginGroup},
     log::LogPlugin,
-    render::pipelined_rendering::PipelinedRenderingPlugin,
     window::{PresentMode, Window, WindowPlugin},
     DefaultPlugins,
 };
